@@ -1,0 +1,19 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "target": "es5",
+        "lib": ["es2016", "dom.iterable"],
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "types": [],
+        "strict": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "outDir": "./lib",
+        "declaration": true
+    },
+    "include": [
+        "./src/**/*.ts"
+    ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "mood-media-player",
+  "version": "1.0.3",
+  "description": "Javascript/Typescript library for controlling a Mood Media player through the REST api",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manbearwiz/mood-media-player.git"
+  },
+  "author": {
+    "name": "Kevin Brey",
+    "email": "manbearwiz@gmail.com",
+    "url": "https://manbearwiz.github.io/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/manbearwiz/mood-media-player/issues"
+  },
+  "homepage": "https://github.com/manbearwiz/mood-media-player#readme",
+  "dependencies": {
+    "tslib": "^1.7.1",
+    "@types/request": "^2.0.3",
+    "request": "^2.81.0",
+    "rxjs": "^5.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^2.4.2"
+  },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts"
+}
