@@ -44,6 +44,20 @@ moodPlayer.login().subscribe(() => {
 });
 ```
 
+### Search and Create Stations
+
+Query the preset genre stations in Pandora and create a personal station from the first result
+
+```
+moodPlayer.login()
+    .mergeMap(() => moodPlayer.searchGenreStations("50s rock"))
+    .first()
+    .do(station => console.log(station.name))
+    .map(station => station.id)
+    .mergeMap(moodPlayer.createStation)
+    .subscribe(console.log);
+```
+
 ### Poll
 
 Since the Mood devices don't support web sockets you must poll to receive updates. This example polls every 1 second and logs the song every time it changes.
