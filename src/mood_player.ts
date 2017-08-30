@@ -1,11 +1,14 @@
-import { ZoneStatus, MoodResponse, Song, GenreStationsData, LoginData, RequestBody, ZoneData, StationsData, ZonesData, SongsData, Station, StationCategory } from "./request_interfaces";
+import { ZoneStatus, MoodResponse, Song, GenreStationsData, LoginData, RequestBody, ZoneData, StationsData, ZonesData, SongsData, Station, StationCategory, StationSearchData } from "./request_interfaces";
 
-import { MoodPlayerPoller} from "./mood_player_poller";
+import { MoodPlayerPoller } from "./mood_player_poller";
 
 import { Observable } from "rxjs";
 import "rxjs/add/operator/mergeMap";
 import "rxjs/add/operator/map";
 import "rxjs/add/observable/interval";
+
+import { RxHR, RxHttpRequestResponse, RxCookieJar } from "@akanass/rx-http-request";
+
 
 import * as request from "request";
 import { RequestResponse } from "request";
@@ -15,7 +18,7 @@ export class MoodPlayer {
     constructor(private uri: string,
         private user = "admin",
         private password = "23646",
-        private cookieJar = request.jar(),
+        private cookieJar = RxHR.jar(),
         private _post = Observable.bindCallback(request.post, (a: RequestResponse, b: RequestBody<any>): RequestBody<any> => b)
     ) {
     }
@@ -30,7 +33,7 @@ export class MoodPlayer {
         });
 
     public sendCommand = <T>(command: string, data = {}): Observable<T> =>
-        this.sendPost(`cmd?cmd=${command}`, { ...data, zoneId: 1 })
+        this.sendPost(`cmd?cmd=${command}`, { zoneId: 1, ...data })
             .map((response: RequestBody<T>): MoodResponse<T> => response.body)
             .map((x: MoodResponse<T>): T => x.data)
 
@@ -58,9 +61,20 @@ export class MoodPlayer {
         this.sendCommand<GenreStationsData>("zone.station.getGenre")
             .map(data => data.categories)
 
+    public searchStations = (query: string): Observable<StationSearchData> =>
+        this.sendCommand<StationSearchData>("zone.station.search", { query: query })
+
+    public searchGenreStations = (query: string): Observable<Station> =>
+        this.sendCommand<StationSearchData>("zone.station.search", { query: query })
+            .map(searchResults => searchResults.genreStyles)
+            .mergeMap(array => Observable.of(...array))
+
     public getStations = (): Observable<Station[]> =>
         this.sendCommand<StationsData>("zone.station.audio.getAll")
             .map(data => data.styles)
+
+    public createStation = (stationToken: string): Observable<ZoneData> =>
+        this.sendCommand<ZoneData>("zone.station.create", { tokenType: "STATION", token: stationToken })
 
     public getZones = (): Observable<ZonesData> =>
         this.sendCommand<ZonesData>("zone.getList")

@@ -20,7 +20,7 @@ export interface Station {
     allowRename: boolean;
     allowSkip: boolean;
     hasAudio: boolean;
-    id: number;
+    id: string;
     name: string;
     shared: boolean;
     visible: boolean;
@@ -66,6 +66,13 @@ export interface StationsData {
 }
 
 export interface SongsData {
+    songs: Song[];
+    zoneId: number;
+}
+
+export interface StationSearchData {
+    artists: Song[];
+    genreStyles: Station[];
     songs: Song[];
     zoneId: number;
 }
