@@ -7,9 +7,6 @@ import "rxjs/add/operator/mergeMap";
 import "rxjs/add/operator/map";
 import "rxjs/add/observable/interval";
 
-import { RxHR, RxHttpRequestResponse, RxCookieJar } from "@akanass/rx-http-request";
-
-
 import * as request from "request";
 import { RequestResponse } from "request";
 
@@ -18,32 +15,28 @@ export class MoodPlayer {
     constructor(private uri: string,
         private user = "admin",
         private password = "23646",
-        private cookieJar = RxHR.jar(),
+        private cookieJar = request.jar(),
         private _post = Observable.bindCallback(request.post, (a: RequestResponse, b: RequestBody<any>): RequestBody<any> => b)
     ) {
     }
 
-    public sendPost = (path: string, data: any): Observable<RequestBody<any>> =>
+    public sendPost = <T>(path: string, data: any): Observable<T> =>
         this._post({
             url: `${this.uri}/${path}`,
             form: data,
             strictSSL: false,
             jar: this.cookieJar,
             json: true
-        });
+        }).map((response: RequestBody<T>): T => response.body.data)
 
     public sendCommand = <T>(command: string, data = {}): Observable<T> =>
         this.sendPost(`cmd?cmd=${command}`, { zoneId: 1, ...data })
-            .map((response: RequestBody<T>): MoodResponse<T> => response.body)
-            .map((x: MoodResponse<T>): T => x.data)
 
     public login = (): Observable<LoginData> =>
         this.sendPost("login", { user: this.user, password: this.password })
-            .map((response: RequestBody<LoginData>): MoodResponse<LoginData> => response.body)
-            .map((x: MoodResponse<LoginData>): LoginData => x.data)
 
     public getStatus = (): Observable<ZoneStatus> =>
-        this.sendCommand<ZoneStatus>("zone.getStatus")
+        this.sendCommand("zone.getStatus")
 
     public getVolume = (): Observable<number> =>
         this.getStatus()
@@ -62,44 +55,49 @@ export class MoodPlayer {
             .map(data => data.categories)
 
     public searchStations = (query: string): Observable<StationSearchData> =>
-        this.sendCommand<StationSearchData>("zone.station.search", { query: query })
+        this.sendCommand("zone.station.search", { query: query })
 
     public searchGenreStations = (query: string): Observable<Station> =>
-        this.sendCommand<StationSearchData>("zone.station.search", { query: query })
-            .map(searchResults => searchResults.genreStyles)
-            .mergeMap(array => Observable.of(...array))
+        this.searchStations(query)
+            .mergeMap(searchResults => Observable.of(...searchResults.genreStyles))
 
     public getStations = (): Observable<Station[]> =>
         this.sendCommand<StationsData>("zone.station.audio.getAll")
             .map(data => data.styles)
 
     public createStation = (stationToken: string): Observable<ZoneData> =>
-        this.sendCommand<ZoneData>("zone.station.create", { tokenType: "STATION", token: stationToken })
+        this.sendCommand("zone.station.create", { tokenType: "STATION", token: stationToken })
 
     public getZones = (): Observable<ZonesData> =>
-        this.sendCommand<ZonesData>("zone.getList")
+        this.sendCommand("zone.getList")
 
     public setStation = (stationId: number): Observable<ZoneData> =>
-        this.sendCommand<ZoneData>("zone.station.audio.set", { styleId: stationId })
+        this.sendCommand("zone.station.audio.set", { styleId: stationId })
 
     public setVolume = (volume: number): Observable<ZoneData> =>
-        this.sendCommand<ZoneData>("zone.volume.set", { volume: volume })
+        this.sendCommand("zone.volume.set", { volume: volume })
 
     public skipTrack = (): Observable<ZoneData> =>
-        this.sendCommand<ZoneData>("zone.track.skip", { step: 1 })
+        this.sendCommand("zone.track.skip", { step: 1 })
 
     public giveTrackFeedback = (positive: boolean, songId: string): Observable<ZoneData> =>
-        this.sendCommand<ZoneData>("zone.track.feedback", { isPositive: positive, songId: songId })
+        this.sendCommand("zone.track.feedback", { isPositive: positive, songId: songId })
+
+    public givePositiveTrackFeedback = (songId: string): Observable<ZoneData> =>
+        this.giveTrackFeedback(true, songId)
+
+    public giveNegativeTrackFeedback = (songId: string): Observable<ZoneData> =>
+        this.giveTrackFeedback(false, songId)
 
     public resume = (): Observable<ZoneData> =>
-        this.sendCommand<ZoneData>("zone.track.resume")
+        this.sendCommand("zone.track.resume")
 
     public pause = (): Observable<ZoneData> =>
-        this.sendCommand<ZoneData>("zone.track.pause")
+        this.sendCommand("zone.track.pause")
 
-    public getStationHistory = (): Observable<Song[]> =>
+    public getStationHistory = (): Observable<Song> =>
         this.sendCommand<SongsData>("zone.station.getHistory")
-            .map(data => data.songs)
+            .mergeMap(data => Observable.of(...data.songs))
 
     public poll = (interval = 1000) =>
         new MoodPlayerPoller(this, interval);
