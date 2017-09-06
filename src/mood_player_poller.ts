@@ -17,7 +17,7 @@ export class MoodPlayerPoller {
     
         private subscriptions: Array<Subscription> = [];
     
-        constructor(private player: MoodPlayer, private interval: number) {
+        constructor(private player: MoodPlayer, private interval = 1000) {
     
             this._status$ = new ReplaySubject(1);
             this._volume$ = new ReplaySubject(1);

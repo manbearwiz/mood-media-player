@@ -3,9 +3,6 @@ import { ZoneStatus, MoodResponse, Song, GenreStationsData, LoginData, RequestBo
 import { MoodPlayerPoller } from "./mood_player_poller";
 
 import { Observable } from "rxjs";
-import "rxjs/add/operator/mergeMap";
-import "rxjs/add/operator/map";
-import "rxjs/add/observable/interval";
 
 import * as request from "request";
 import { RequestResponse } from "request";
@@ -50,10 +47,10 @@ export class MoodPlayer {
         this.getStatus()
             .map(status => status.currentAudioStyle);
 
-    public getGenreStations = (): Observable<StationCategory[]> =>
+    public getGenreStations = (): Observable<StationCategory> =>
         this.sendCommand<GenreStationsData>("zone.station.getGenre")
-            .map(data => data.categories)
-
+            .mergeMap(data => Observable.of(...data.categories))
+            
     public searchStations = (query: string): Observable<StationSearchData> =>
         this.sendCommand("zone.station.search", { query: query })
 
@@ -61,10 +58,10 @@ export class MoodPlayer {
         this.searchStations(query)
             .mergeMap(searchResults => Observable.of(...searchResults.genreStyles))
 
-    public getStations = (): Observable<Station[]> =>
+    public getStations = (): Observable<Station> =>
         this.sendCommand<StationsData>("zone.station.audio.getAll")
-            .map(data => data.styles)
-
+            .mergeMap(data => Observable.of(...data.styles))
+            
     public createStation = (stationToken: string): Observable<ZoneData> =>
         this.sendCommand("zone.station.create", { tokenType: "STATION", token: stationToken })
 
