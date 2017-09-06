@@ -1,3 +1,9 @@
+
+[![npm](https://img.shields.io/npm/v/mood-media-player.svg?style=flat-square)]()
+[![npm](https://img.shields.io/npm/dt/mood-media-player.svg?style=flat-square)]()
+[![GitHub issues](https://img.shields.io/github/issues/manbearwiz/mood-media-player.svg?style=flat-square)](https://github.com/manbearwiz/mood-media-player/issues)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://raw.githubusercontent.com/manbearwiz/mood-media-player/master/LICENSE)
+
 # mood-media-player
 
 Javascript/Typescript library for controlling a Mood Media player through the REST api
